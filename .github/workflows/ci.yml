@@ -1,0 +1,91 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test and Coverage (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            name: Linux
+            coverage_flag: linux
+          - os: macos-latest
+            name: macOS
+            coverage_flag: macos
+          - os: windows-latest
+            name: Windows
+            coverage_flag: windows
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install MoonBit (Unix)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+
+      - name: Install MoonBit (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Set-ExecutionPolicy Bypass -Scope Process -Force
+          irm https://cli.moonbitlang.com/install/powershell.ps1 | iex
+          "$HOME/.moon/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Test with coverage
+        shell: bash
+        run: |
+          moon update
+          moon test --target native --enable-coverage
+          moon coverage analyze -p justjavac/ttl -- -f cobertura -o coverage.xml
+
+      - name: Upload coverage to Codecov (${{ matrix.name }})
+        uses: codecov/codecov-action@v5
+        with:
+          files: coverage.xml
+          flags: ${{ matrix.coverage_flag }}
+          disable_search: true
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true
+
+  verify:
+    name: Verify Generated Files
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install MoonBit
+        shell: bash
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+
+      - name: Verify formatting and generated files
+        shell: bash
+        run: |
+          moon update
+          moon fmt --check
+          moon check --target all
+          moon test --target all
+          moon info
+          git diff --exit-code
