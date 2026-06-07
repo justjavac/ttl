@@ -1,0 +1,74 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "justjavac/ttl"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+
+// Errors
+
+// Types and methods
+pub(all) struct CacheEntry[T] {
+  key : String
+  val : T
+  expire_ms : Int64
+} derive(Eq, @debug.Debug)
+
+pub(all) enum EventKind {
+  Hit
+  Miss
+  Expired
+  Drop
+  Set
+  Del
+} derive(Eq, Hash, @debug.Debug)
+pub impl Show for EventKind
+
+type Item[T]
+
+type Listener[T]
+
+pub(all) struct SetEntry[T] {
+  key : String
+  val : T
+  ttl_ms : Int64?
+} derive(Eq, @debug.Debug)
+pub fn[T] SetEntry::new(String, T, ttl_ms? : Int64) -> Self[T]
+
+pub struct TTL[T] {
+  store : Map[String, Item[T]]
+  listeners : Map[EventKind, Array[Listener[T]]]
+  mut default_ttl_ms : Int64
+  mut capacity : Int
+  mut next_listener_id : Int
+}
+pub fn[T] TTL::add_listener(Self[T], EventKind, (TTLEvent[T]) -> Unit) -> Int
+pub fn[T] TTL::capacity(Self[T]) -> Int
+pub fn[T] TTL::clear(Self[T]) -> Unit
+pub fn[T] TTL::default_ttl_ms(Self[T]) -> Int64
+pub fn[T] TTL::del(Self[T], String) -> T?
+pub fn[T] TTL::entries(Self[T], now_ms~ : Int64) -> Array[CacheEntry[T]]
+pub fn[T] TTL::get(Self[T], String, now_ms~ : Int64) -> T?
+pub fn[T] TTL::has(Self[T], String, now_ms~ : Int64) -> Bool
+pub fn[T] TTL::mset(Self[T], ArrayView[SetEntry[T]], now_ms~ : Int64) -> Int
+pub fn[T] TTL::new(default_ttl_ms? : Int64, capacity? : Int) -> Self[T]
+pub fn[T] TTL::purge_expired(Self[T], now_ms~ : Int64) -> Int
+pub fn[T] TTL::remove_listener(Self[T], EventKind, Int) -> Bool
+pub fn[T] TTL::set(Self[T], String, T, now_ms~ : Int64, ttl_ms? : Int64) -> Bool
+pub fn[T] TTL::set_capacity(Self[T], Int) -> Bool
+pub fn[T] TTL::set_default_ttl_ms(Self[T], Int64) -> Unit
+pub fn[T] TTL::size(Self[T], now_ms? : Int64) -> Int
+
+pub(all) struct TTLEvent[T] {
+  kind : EventKind
+  key : String
+  val : T?
+  expire_ms : Int64?
+} derive(Eq, @debug.Debug)
+
+// Type aliases
+
+// Traits
+
