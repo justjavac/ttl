@@ -1,0 +1,7 @@
+import {
+  "justjavac/ttl",
+}
+
+options(
+  "is-main": true,
+)

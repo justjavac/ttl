@@ -1,7 +1,0 @@
-// import {
-//   "justjavac/ttl" @lib,
-// }
-
-options(
-  "is-main": true,
-)
