@@ -2,15 +2,15 @@
 test "set get miss and events" {
   let cache : @ttl.TTL[String] = @ttl.TTL::new(default_ttl_ms=10L)
   let events : Array[String] = []
-  cache.add_listener(@ttl.EventKind::Set, fn(event) {
+  cache.add_listener(Set, fn(event) {
     events.push("\{event.kind}:\{event.key}:\{event.val.unwrap()}")
   })
   |> ignore
-  cache.add_listener(@ttl.EventKind::Hit, fn(event) {
+  cache.add_listener(Hit, fn(event) {
     events.push("\{event.kind}:\{event.key}:\{event.val.unwrap()}")
   })
   |> ignore
-  cache.add_listener(@ttl.EventKind::Miss, fn(event) {
+  cache.add_listener(Miss, fn(event) {
     events.push("\{event.kind}:\{event.key}")
   })
   |> ignore
@@ -30,15 +30,15 @@ test "set get miss and events" {
 test "expiry is lazy and emits expired del miss" {
   let cache : @ttl.TTL[String] = @ttl.TTL::new(default_ttl_ms=10L)
   let events : Array[String] = []
-  cache.add_listener(@ttl.EventKind::Expired, fn(event) {
+  cache.add_listener(Expired, fn(event) {
     events.push("\{event.kind}:\{event.key}:\{event.val.unwrap()}")
   })
   |> ignore
-  cache.add_listener(@ttl.EventKind::Del, fn(event) {
+  cache.add_listener(Del, fn(event) {
     events.push("\{event.kind}:\{event.key}:\{event.val.unwrap()}")
   })
   |> ignore
-  cache.add_listener(@ttl.EventKind::Miss, fn(event) {
+  cache.add_listener(Miss, fn(event) {
     events.push("\{event.kind}:\{event.key}")
   })
   |> ignore
@@ -55,7 +55,7 @@ test "expiry is lazy and emits expired del miss" {
 test "delete clear and capacity" {
   let cache : @ttl.TTL[String] = @ttl.TTL::new(default_ttl_ms=10L, capacity=1)
   let dropped : Array[String] = []
-  cache.add_listener(@ttl.EventKind::Drop, fn(event) {
+  cache.add_listener(Drop, fn(event) {
     dropped.push("\{event.key}:\{event.val.unwrap()}")
   })
   |> ignore
@@ -77,9 +77,7 @@ test "delete clear and capacity" {
 test "mset entries purge and listener removal" {
   let cache : @ttl.TTL[String] = @ttl.TTL::new(default_ttl_ms=10L)
   let hits : Array[String] = []
-  let id = cache.add_listener(@ttl.EventKind::Hit, fn(event) {
-    hits.push(event.key)
-  })
+  let id = cache.add_listener(Hit, fn(event) { hits.push(event.key) })
 
   let accepted = cache.mset(
     [
@@ -93,7 +91,7 @@ test "mset entries purge and listener removal" {
   guard cache.get("foo", now_ms=5L) is Some("bar") else {
     fail("expected foo hit")
   }
-  assert_true(cache.remove_listener(@ttl.EventKind::Hit, id))
+  assert_true(cache.remove_listener(Hit, id))
   guard cache.get("ping", now_ms=5L) is Some("pong") else {
     fail("expected ping hit")
   }

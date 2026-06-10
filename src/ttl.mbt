@@ -100,7 +100,7 @@ fn[T] entry_item(pair : (String, Item[T])) -> Item[T] {
 ///|
 fn[T] cache_entry_from_pair(pair : (String, Item[T])) -> CacheEntry[T] {
   let (key, item) = pair
-  CacheEntry::{ key, val: item.val, expire_ms: item.expire_ms }
+  { key, val: item.val, expire_ms: item.expire_ms }
 }
 
 ///|
