@@ -1,6 +1,6 @@
 name = "justjavac/ttl"
 
-version = "0.1.1"
+version = "0.1.2"
 
 readme = "README.mbt.md"
 
@@ -12,6 +12,4 @@ keywords = [ "ttl", "cache", "time-to-live", "in-memory" ]
 
 description = "A small in-memory TTL cache for MoonBit"
 
-options(
-  source: "src",
-)
+source = "src"

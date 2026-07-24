@@ -4,7 +4,13 @@ pub fn[T] TTL::new(
   default_ttl_ms? : Int64 = 10_000L,
   capacity? : Int = 1_000_000_000,
 ) -> TTL[T] {
-  { store: {}, listeners: {}, default_ttl_ms, capacity, next_listener_id: 0 }
+  {
+    store: Map([]),
+    listeners: Map([]),
+    default_ttl_ms,
+    capacity,
+    next_listener_id: 0,
+  }
 }
 
 ///|
