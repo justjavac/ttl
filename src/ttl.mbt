@@ -1,8 +1,8 @@
 ///|
 /// Creates an empty TTL cache.
 pub fn[T] TTL::new(
-  default_ttl_ms? : Int64 = 10_000L,
-  capacity? : Int = 1_000_000_000,
+  default_ttl_ms~ : Int64 = 10_000L,
+  capacity~ : Int32 = 1_000_000_000,
 ) -> TTL[T] {
   {
     store: Map([]),
@@ -27,13 +27,13 @@ pub fn[T] TTL::set_default_ttl_ms(self : TTL[T], ttl_ms : Int64) -> Unit {
 
 ///|
 /// Returns the maximum number of keys accepted by the cache.
-pub fn[T] TTL::capacity(self : TTL[T]) -> Int {
+pub fn[T] TTL::capacity(self : TTL[T]) -> Int32 {
   self.capacity
 }
 
 ///|
 /// Updates cache capacity. Negative values are rejected.
-pub fn[T] TTL::set_capacity(self : TTL[T], capacity : Int) -> Bool {
+pub fn[T] TTL::set_capacity(self : TTL[T], capacity : Int32) -> Bool {
   if capacity < 0 {
     false
   } else {
@@ -65,7 +65,7 @@ pub fn[T] TTL::set(
       ignore(self.del(key))
     }
     let expire_ms = now_ms + ttl
-    self.store[key] = { val, expire_ms }
+    self.store[key] = { val, expire_ms, }
     self.emit(Set, key, Some(val), Some(expire_ms))
     true
   }
@@ -77,7 +77,7 @@ pub fn[T] TTL::mset(
   self : TTL[T],
   entries : ArrayView[SetEntry[T]],
   now_ms~ : Int64,
-) -> Int {
+) -> Int32 {
   let mut accepted = 0
   for entry in entries {
     let ok = match entry.ttl_ms {
@@ -106,7 +106,7 @@ fn[T] entry_item(pair : (String, Item[T])) -> Item[T] {
 ///|
 fn[T] cache_entry_from_pair(pair : (String, Item[T])) -> CacheEntry[T] {
   let (key, item) = pair
-  { key, val: item.val, expire_ms: item.expire_ms }
+  { key, val: item.val, expire_ms: item.expire_ms, }
 }
 
 ///|
@@ -169,7 +169,7 @@ pub fn[T] TTL::clear(self : TTL[T]) -> Unit {
 
 ///|
 /// Removes all expired keys and returns the number removed.
-pub fn[T] TTL::purge_expired(self : TTL[T], now_ms~ : Int64) -> Int {
+pub fn[T] TTL::purge_expired(self : TTL[T], now_ms~ : Int64) -> Int32 {
   let entries = self.store.to_array()
   let mut removed = 0
   for pair in entries {
@@ -186,7 +186,7 @@ pub fn[T] TTL::purge_expired(self : TTL[T], now_ms~ : Int64) -> Int {
 ///|
 /// Returns the number of stored keys. When `now_ms` is supplied, expired keys
 /// are purged before counting.
-pub fn[T] TTL::size(self : TTL[T], now_ms? : Int64) -> Int {
+pub fn[T] TTL::size(self : TTL[T], now_ms? : Int64) -> Int32 {
   match now_ms {
     Some(now) => ignore(self.purge_expired(now_ms=now))
     None => ()

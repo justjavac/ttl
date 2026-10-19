@@ -15,6 +15,9 @@ pub(all) struct CacheEntry[T] {
   val : T
   expire_ms : Int64
 } derive(Eq, @debug.Debug)
+pub fn[T : Eq] CacheEntry::equal(Self[T], Self[T]) -> Bool
+pub fn[T : Eq] CacheEntry::not_equal(Self[T], Self[T]) -> Bool
+pub fn[T : @debug.Debug] CacheEntry::to_repr(Self[T]) -> @debug.Repr
 
 pub(all) enum EventKind {
   Hit
@@ -24,6 +27,13 @@ pub(all) enum EventKind {
   Set
   Del
 } derive(Eq, Hash, @debug.Debug)
+pub fn EventKind::equal(Self, Self) -> Bool
+pub fn EventKind::hash(Self) -> Int
+pub fn EventKind::hash_combine(Self, Hasher) -> Unit
+pub fn EventKind::not_equal(Self, Self) -> Bool
+pub fn EventKind::output(Self, &Logger) -> Unit
+pub fn EventKind::to_repr(Self) -> @debug.Repr
+pub fn EventKind::to_string(Self) -> String
 pub impl Show for EventKind
 
 type Item[T]
@@ -35,7 +45,10 @@ pub(all) struct SetEntry[T] {
   val : T
   ttl_ms : Int64?
 } derive(Eq, @debug.Debug)
+pub fn[T : Eq] SetEntry::equal(Self[T], Self[T]) -> Bool
 pub fn[T] SetEntry::new(String, T, ttl_ms? : Int64) -> Self[T]
+pub fn[T : Eq] SetEntry::not_equal(Self[T], Self[T]) -> Bool
+pub fn[T : @debug.Debug] SetEntry::to_repr(Self[T]) -> @debug.Repr
 
 pub struct TTL[T] {
   store : Map[String, Item[T]]
@@ -67,8 +80,10 @@ pub(all) struct TTLEvent[T] {
   val : T?
   expire_ms : Int64?
 } derive(Eq, @debug.Debug)
+pub fn[T : Eq] TTLEvent::equal(Self[T], Self[T]) -> Bool
+pub fn[T : Eq] TTLEvent::not_equal(Self[T], Self[T]) -> Bool
+pub fn[T : @debug.Debug] TTLEvent::to_repr(Self[T]) -> @debug.Repr
 
 // Type aliases
 
 // Traits
-
