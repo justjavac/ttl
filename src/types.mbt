@@ -16,6 +16,15 @@ pub(all) enum EventKind {
 } derive(Debug, Eq, Hash)
 
 ///|
+pub extend EventKind with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend EventKind with Eq::{not_equal, equal}
+
+///|
+pub extend EventKind with Hash::{hash, hash_combine}
+
+///|
 /// Event payload passed to cache listeners.
 pub(all) struct TTLEvent[T] {
   kind : EventKind
@@ -23,6 +32,12 @@ pub(all) struct TTLEvent[T] {
   val : T?
   expire_ms : Int64?
 } derive(Debug, Eq)
+
+///|
+pub extend TTLEvent with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend TTLEvent with Eq::{not_equal, equal}
 
 ///|
 /// Item returned by `TTL::entries`.
@@ -33,6 +48,12 @@ pub(all) struct CacheEntry[T] {
 } derive(Debug, Eq)
 
 ///|
+pub extend CacheEntry with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend CacheEntry with Eq::{not_equal, equal}
+
+///|
 /// Item accepted by `TTL::mset`.
 pub(all) struct SetEntry[T] {
   key : String
@@ -41,9 +62,15 @@ pub(all) struct SetEntry[T] {
 } derive(Debug, Eq)
 
 ///|
+pub extend SetEntry with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend SetEntry with Eq::{not_equal, equal}
+
+///|
 /// Creates an entry for `TTL::mset`.
 pub fn[T] SetEntry::new(key : String, val : T, ttl_ms? : Int64) -> SetEntry[T] {
-  { key, val, ttl_ms }
+  { key, val, ttl_ms, }
 }
 
 ///|
@@ -54,7 +81,7 @@ struct Item[T] {
 
 ///|
 struct Listener[T] {
-  id : Int
+  id : Int32
   callback : (TTLEvent[T]) -> Unit
 }
 
@@ -67,6 +94,6 @@ pub struct TTL[T] {
   store : Map[String, Item[T]]
   listeners : Map[EventKind, Array[Listener[T]]]
   mut default_ttl_ms : Int64
-  mut capacity : Int
-  mut next_listener_id : Int
+  mut capacity : Int32
+  mut next_listener_id : Int32
 }

@@ -1,4 +1,7 @@
 ///|
+pub extend EventKind with Show::{to_string, output}
+
+///|
 pub impl Show for EventKind with fn to_string(self) {
   match self {
     Hit => "Hit"
@@ -16,9 +19,9 @@ pub fn[T] TTL::add_listener(
   self : TTL[T],
   kind : EventKind,
   callback : (TTLEvent[T]) -> Unit,
-) -> Int {
+) -> Int32 {
   self.next_listener_id += 1
-  let listener = Listener::{ id: self.next_listener_id, callback }
+  let listener = Listener::{ id: self.next_listener_id, callback, }
   match self.listeners.get(kind) {
     Some(listeners) => listeners.push(listener)
     None => self.listeners[kind] = [listener]
@@ -31,7 +34,7 @@ pub fn[T] TTL::add_listener(
 pub fn[T] TTL::remove_listener(
   self : TTL[T],
   kind : EventKind,
-  listener_id : Int,
+  listener_id : Int32,
 ) -> Bool {
   match self.listeners.get(kind) {
     None => false
@@ -62,7 +65,7 @@ fn[T] TTL::emit(
   val : T?,
   expire_ms : Int64?,
 ) -> Unit {
-  self.dispatch({ kind, key, val, expire_ms })
+  self.dispatch({ kind, key, val, expire_ms, })
 }
 
 ///|
